@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alien Chess Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #ffffff;
+      color: #222222;
+    }
+
+    .sidebar {
+      width: 100%;
+      background: #f8f9fa;
+      height: 100vh;
+      overflow-y: auto;
+      border-right: 4px solid #0066ff;
+      box-shadow: 0 0 25px rgba(0, 102, 255, 0.25);
+    }
+
+    /* Header */
+    .header {
+      width: 100%;
+      background: linear-gradient(135deg, #0066ff, #00aaff);
+      padding: 35px 20px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header h1 {
+      font-size: 29px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 0 15px #fff, 0 0 35px #00ccff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .header p { color: rgba(255,255,255,0.95); font-size: 15px; }
+
+    /* Navigation */
+    .nav-section {
+      padding: 0 15px;
+      margin: 25px 0 35px;
+    }
+
+    .nav-header {
+      color: #0066ff;
+      font-size: 14.5px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      padding-left: 5px;
+    }
+
+    .nav-scroll-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 8px 0;
+      scrollbar-width: none;
+    }
+
+    .nav-scroll::-webkit-scrollbar { display: none; }
+
+    .nav-block {
+      background: #ffffff;
+      border: 2px solid #0066ff;
+      border-radius: 16px;
+      padding: 18px 14px;
+      min-width: 118px;
+      text-align: center;
+      color: #222222;
+      text-decoration: none;
+      font-size: 14.5px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .nav-block:hover {
+      transform: translateY(-6px) scale(1.05);
+      border-color: #00aaff;
+    }
+
+    .nav-block i {
+      font-size: 26px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,102,255,0.9);
+      color: white;
+      border: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      z-index: 10;
+    }
+
+    /* Sections */
+    .section {
+      padding: 0 15px;
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      color: #0066ff;
+      font-size: 14.5px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      padding-left: 8px;
+    }
+
+    .api-frame {
+      width: 100%;
+      border: 1px solid #0066ff;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    /* Calendar */
+    .calendar {
+      background: white;
+      border: 2px solid #0066ff;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: bold;
+      color: #0066ff;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      text-align: center;
+      font-size: 13.5px;
+    }
+
+    .day-name { font-weight: 600; color: #555; padding: 6px 0; }
+
+    .calendar-day {
+      padding: 9px 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .calendar-day.event {
+      background: #0066ff;
+      color: white;
+      font-weight: bold;
+      animation: eventPulse 2s infinite alternate;
+    }
+
+    @keyframes eventPulse {
+      from { box-shadow: 0 0 8px #0066ff; }
+      to { box-shadow: 0 0 20px #00ccff; }
+    }
+
+    .tooltip {
+      position: absolute;
+      background: linear-gradient(#0066ff, #00aaff);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s ease;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px rgba(0,102,255,0.4);
+    }
+
+    .calendar-day:hover .tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-8px);
+    }
+
+    /* Music Player */
+    .music-player {
+      background: white;
+      border: 2px solid #0066ff;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .now-playing {
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #0066ff;
+      min-height: 22px;
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #0066ff;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin: 15px 0;
+    }
+
+    .controls button {
+      background: #0066ff;
+      color: white;
+      border: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: #ddd;
+      border-radius: 999px;
+      cursor: pointer;
+      margin: 15px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #0066ff;
+      width: 0%;
+      border-radius: 999px;
+    }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .song-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: #f8f9fa;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .song-item:hover { background: #f0f4ff; }
+
+    .add-to-queue {
+      background: #00cc77;
+      color: white;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .queue-list {
+      max-height: 180px;
+      overflow-y: auto;
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 8px;
+    }
+
+    .invite-section {
+      background: #f0f4ff;
+      border: 2px dashed #0066ff;
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      margin: 0 15px 20px;
+    }
+
+    .copy-btn {
+      background: linear-gradient(#0066ff, #00aaff);
+      color: white;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+
+    <!-- Header -->
+    <div class="header">
+      <h1>👽 ALIEN CHESS HUB</h1>
+      <p>Intergalactic Chess Club</p>
+    </div>
+
+    <!-- 7 Navigation Buttons -->
+    <div class="nav-section">
+      <div class="nav-header">Quick Navigation</div>
+      <div class="nav-scroll-container">
+        <button class="nav-arrow left" onclick="scrollNav(-1)">‹</button>
+        <div class="nav-scroll" id="nav-scroll">
+          <a href="https://www.chess.com/club/alien-chess-hub" class="nav-block" target="_blank">
+            <i class="fas fa-home" style="color:#00ccff"></i><span>Home</span>
+          </a>
+          <a href="https://www.chess.com/club/alien-chess-hub-tournament-club" class="nav-block" target="_blank">
+            <i class="fas fa-chess-knight" style="color:#ff9900"></i><span>Tournaments</span>
+          </a>
+          <a href="https://www.chess.com/clubs/members/alien-chess-hub" class="nav-block" target="_blank">
+            <i class="fas fa-users" style="color:#00ff88"></i><span>Members</span>
+          </a>
+          <a href="https://www.chess.com/club/leaderboard/alien-chess-hub" class="nav-block" target="_blank">
+            <i class="fas fa-trophy" style="color:#ffd700"></i><span>Leaderboards</span>
+          </a>
+          <a href="#" class="nav-block" target="_blank">
+            <i class="fas fa-fist-raised" style="color:#ff4444"></i><span>Team Battles</span>
+          </a>
+          <a href="#" class="nav-block" target="_blank">
+            <i class="fas fa-comments" style="color:#aa66ff"></i><span>Forum</span>
+          </a>
+          <a href="https://www.chess.com/puzzles" class="nav-block" target="_blank">
+            <i class="fas fa-graduation-cap" style="color:#00ccff"></i><span>Lessons</span>
+          </a>
+        </div>
+        <button class="nav-arrow right" onclick="scrollNav(1)">›</button>
+      </div>
+    </div>
+
+    <!-- Newest Members -->
+    <div class="section">
+      <div class="section-title">🌌 Newest Members</div>
+      <iframe class="api-frame" style="height: 280px;" src="https://chatgpt758.github.io/ks/" frameborder="0"></iframe>
+    </div>
+
+    <!-- Member Progress -->
+    <div class="section">
+      <div class="section-title">📈 Member Progress</div>
+      <iframe class="api-frame" style="height: 180px;" src="https://chatgpt758.github.io/y/" frameborder="0"></iframe>
+    </div>
+
+    <!-- Calendar -->
+    <div class="section">
+      <div class="section-title">📅 Events Calendar</div>
+      <div class="calendar">
+        <div class="calendar-header">
+          <button onclick="prevMonth()">‹</button>
+          <span id="month-year"></span>
+          <button onclick="nextMonth()">›</button>
+        </div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+      </div>
+    </div>
+
+    <!-- Music Player with Search & Queue -->
+    <div class="section">
+      <div class="section-title">🎵 Alien Chess Vibes</div>
+      <div class="music-player">
+
+        <div class="now-playing" id="now-playing">Select a song to play</div>
+        <audio id="audio-player" style="display:none;"></audio>
+
+        <!-- Search Bar -->
+        <input type="text" id="search-bar" class="search-bar" placeholder="Search songs..." onkeyup="filterSongs()">
+
+        <div class="controls">
+          <button onclick="prevTrack()"><i class="fas fa-step-backward"></i></button>
+          <button id="play-btn" onclick="togglePlay()"><i class="fas fa-play"></i></button>
+          <button onclick="nextTrack()"><i class="fas fa-step-forward"></i></button>
+        </div>
+
+        <div class="progress-bar" id="progress-bar" onclick="seek(event)">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="volume-container">
+          <i class="fas fa-volume-up"></i>
+          <input type="range" id="volume-slider" min="0" max="100" value="70" style="flex:1;" oninput="changeVolume()">
+        </div>
+
+        <!-- Playlist -->
+        <div style="margin: 18px 0 8px; font-weight:600; color:#0066ff;">Playlist</div>
+        <div id="playlist" style="max-height:220px; overflow-y:auto;"></div>
+
+        <!-- Queue -->
+        <div style="margin-top:20px; font-weight:600; color:#0066ff; display:flex; justify-content:space-between; align-items:center;">
+          <span>Queue</span>
+          <button onclick="clearQueue()" style="background:#ff4444; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:12px; cursor:pointer;">Clear</button>
+        </div>
+        <div id="queue-list" class="queue-list"></div>
+
+      </div>
+    </div>
+
+    <!-- Invite -->
+    <div class="invite-section">
+      <p style="margin-bottom:10px; font-size:14px; color:#333;">Bring more aliens to the hub</p>
+      <input type="text" id="inviteUrl" value="https://www.chess.com/club/alien-chess-hub"
+             style="width:100%; padding:12px; background:#fff; border:1px solid #0066ff; border-radius:8px; color:#222; font-size:13px;" readonly>
+      <button onclick="copyInvite()" class="copy-btn">
+        <i class="fas fa-copy"></i> Copy Invite Link
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // === Replace these with your real direct MP3 links ===
+    const songs = [
+      { title: "Aliens Theme Song", src: "https://files.catbox.moe/wbogot.mp3" },
+      { title: "Alien Opening", src: "https://your-link.com/song2.mp3" },
+      { title: "Midnight Blitz", src: "https://your-link.com/song3.mp3" },
+      { title: "Nebula Endgame", src: "https://your-link.com/song4.mp3" },
+      { title: "Quantum Gambit", src: "https://your-link.com/song5.mp3" },
+      { title: "Stellar Strategy", src: "https://your-link.com/song6.mp3" },
+      { title: "Void Knight", src: "https://your-link.com/song7.mp3" },
+      { title: "Galactic Pawn", src: "https://your-link.com/song8.mp3" },
+      { title: "Warp Speed Mate", src: "https://your-link.com/song9.mp3" },
+      { title: "Eternal Rook", src: "https://your-link.com/song10.mp3" }
+    ];
+
+    let audio = document.getElementById('audio-player');
+    let currentTrack = 0;
+    let queue = [];
+
+    // Load Playlist with Search
+    function loadPlaylist(filteredSongs = songs) {
+      const container = document.getElementById('playlist');
+      container.innerHTML = '';
+
+      filteredSongs.forEach((song, i) => {
+        const originalIndex = songs.indexOf(song);
+        const div = document.createElement('div');
+        div.className = 'song-item';
+        div.innerHTML = `
+          <span>${song.title}</span>
+          <button class="add-to-queue" onclick="addToQueue(${originalIndex}); event.stopImmediatePropagation()">+ Queue</button>
+        `;
+        div.onclick = () => playTrack(originalIndex);
+        container.appendChild(div);
+      });
+    }
+
+    function filterSongs() {
+      const query = document.getElementById('search-bar').value.toLowerCase();
+      const filtered = songs.filter(song => song.title.toLowerCase().includes(query));
+      loadPlaylist(filtered);
+    }
+
+    function playTrack(index) {
+      currentTrack = index;
+      audio.src = songs[index].src;
+      audio.play();
+      document.getElementById('now-playing').textContent = songs[index].title;
+      document.getElementById('play-btn').innerHTML = '<i class="fas fa-pause"></i>';
+    }
+
+    function togglePlay() {
+      if (audio.paused) {
+        audio.play();
+        document.getElementById('play-btn').innerHTML = '<i class="fas fa-pause"></i>';
+      } else {
+        audio.pause();
+        document.getElementById('play-btn').innerHTML = '<i class="fas fa-play"></i>';
+      }
+    }
+
+    function nextTrack() {
+      currentTrack = (currentTrack + 1) % songs.length;
+      playTrack(currentTrack);
+    }
+
+    function prevTrack() {
+      currentTrack = (currentTrack - 1 + songs.length) % songs.length;
+      playTrack(currentTrack);
+    }
+
+    function seek(e) {
+      const bar = document.getElementById('progress-bar');
+      const percent = e.offsetX / bar.offsetWidth;
+      audio.currentTime = percent * audio.duration;
+    }
+
+    function changeVolume() {
+      audio.volume = document.getElementById('volume-slider').value / 100;
+    }
+
+    function addToQueue(index) {
+      queue.push(songs[index]);
+      renderQueue();
+    }
+
+    function renderQueue() {
+      const container = document.getElementById('queue-list');
+      container.innerHTML = queue.map((song, i) => 
+        `<div style="padding:8px; background:#e0f0ff; margin:4px 0; border-radius:8px;">${song.title}</div>`
+      ).join('');
+    }
+
+    function clearQueue() {
+      queue = [];
+      renderQueue();
+    }
+
+    // Calendar
+    let currentDate = new Date();
+
+    function generateCalendar() {
+      const grid = document.getElementById('calendar-grid');
+      const monthYear = document.getElementById('month-year');
+      grid.innerHTML = '';
+
+      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      monthYear.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      days.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'day-name';
+        el.textContent = d;
+        grid.appendChild(el);
+      });
+
+      const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+      const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day';
+        dayEl.textContent = day;
+
+        if (day === 1) {
+          dayEl.classList.add('event');
+          const tt = document.createElement('div');
+          tt.className = 'tooltip';
+          tt.textContent = 'International Premier League (IPL) Daily Tournament';
+          dayEl.appendChild(tt);
+        }
+        if (day === 20) {
+          dayEl.classList.add('event');
+          const tt = document.createElement('div');
+          tt.className = 'tooltip';
+          tt.textContent = 'Alien Monthly Blitz Championship';
+          dayEl.appendChild(tt);
+        }
+        grid.appendChild(dayEl);
+      }
+    }
+
+    function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); generateCalendar(); }
+    function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); generateCalendar(); }
+
+    function scrollNav(direction) {
+      const container = document.getElementById('nav-scroll');
+      container.scrollLeft += direction * 290;
+    }
+
+    function copyInvite() {
+      const link = document.getElementById("inviteUrl");
+      link.select();
+      document.execCommand("copy");
+      alert("Invite link copied!");
+    }
+
+    // Initialize
+    window.onload = () => {
+      loadPlaylist();
+      generateCalendar();
+      audio.volume = 0.7;
+
+      // Auto update progress bar
+      audio.ontimeupdate = () => {
+        const percent = (audio.currentTime / audio.duration) * 100 || 0;
+        document.getElementById('progress-fill').style.width = percent + '%';
+      };
+    };
+  </script>
+
+</body>
+</html>
